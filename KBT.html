@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        #rules, #quiz-container {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+        }
+        #rules {
+            background-color: rgba(0, 0, 0, 0.3);
+            text-align: left;
+            display: inline-block;
+        }
+        #result {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        .feedback {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input[type="radio"] {
+            margin: 10px 0;
+        }
+        #timer {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Game</h1>
+    <div id="rules">
+        <h2>Rules:</h2>
+        <ul>
+            <li>For each right answer you get 100 points.</li>
+            <li>For every wrong answer you lose 50 points.</li>
+        </ul>
+    </div>
+    <div id="quiz-container"></div>
+    <p id="timer"></p>
+    <p id="result"></p>
+    <button id="start-button" onclick="startQuiz()">Start Quiz</button>
+    <script>
+        const quesbank = [
+            [1, "Who was the lead actress in Dilwale Dulhania Le Jayenge?", "Rani Mukerji", "Aishwarya Rai", "Kajol", "Madhuri Dixit", "Kajol"],
+            [2, "Who was the lead actor in 3 Idiots?", "Shahrukh Khan", "Aamir Khan", "Akshay Kumar", "Salman Khan", "Aamir Khan"],
+            [3, "Who is Shahrukh Khan's wife?", "Deepika Padukone", "Rani Mukerji", "Gauri Khan", "Priyanka Chopra", "Gauri Khan"],
+            [4, "Who was the lead actress in Queen?", "Deepika Padukone", "Kangana Ranaut", "Kareena Kapoor", "Priyanka Chopra", "Kangana Ranaut"],
+            [5, "Who was the lead actor in Dhoom 2?", "Aamir Khan", "Salman Khan", "Hrithik Roshan", "John Abraham", "Hrithik Roshan"],
+            [6, "Who is Aishwarya Rai's husband?", "Aamir Khan", "Hrithik Roshan", "Abhishek Bachchan", "Shahrukh Khan", "Abhishek Bachchan"],
+            [7, "Who played the role of Rani in Hichki?", "Anushka Sharma", "Kareena Kapoor", "Kangana Ranaut", "Rani Mukerji", "Rani Mukerji"],
+            [8, "Who played the role of Chulbul Pandey in Dabangg?", "Ranveer Singh", "Akshay Kumar", "Salman Khan", "Ajay Devgan", "Salman Khan"],
+            [9, "Who was the lead actress in Piku?", "Priyanka Chopra", "Deepika Padukone", "Alia Bhatt", "Kareena Kapoor", "Deepika Padukone"],
+            [10, "Who was the lead actor in Zindagi Na Milegi Dobara?", "Farhan Akhtar", "Hrithik Roshan", "All of the above", "Abhay Deol", "All of the above"],
+            [11, "Who is Anushka Sharma's husband?", "MS Dhoni", "Rohit Sharma", "Yuvraj Singh", "Virat Kohli", "Virat Kohli"],
+            [12, "Who played the role of Geet in Jab We Met?", "Deepika Padukone", "Priyanka Chopra", "Katrina Kaif", "Kareena Kapoor", "Kareena Kapoor"],
+            [13, "Who was the lead actor in Bajirao Mastani?", "Ranbir Kapoor", "Ranveer Singh", "Shahid Kapoor", "Arjun Kapoor", "Ranveer Singh"],
+            [14, "Who is Twinkle Khanna's husband?", "Ajay Devgan", "Aamir Khan", "Akshay Kumar", "Salman Khan", "Akshay Kumar"],
+            [15, "Who played the role of Anjali in Kabhi Khushi Kabhie Gham?", "Rani Mukerji", "Preity Zinta", "Aishwarya Rai", "Kajol", "Kajol"],
+            [16, "Who was the lead actress in Barfi?", "Anushka Sharma", "Deepika Padukone", "Priyanka Chopra", "Kareena Kapoor", "Priyanka Chopra"],
+            [17, "Who was the lead actor in Sultan?", "Shahrukh Khan", "Aamir Khan", "Akshay Kumar", "Salman Khan", "Salman Khan"],
+            [18, "Who is Priyanka Chopra's husband?", "Kevin Jonas", "Joe Jonas", "Nick Jonas", "Zayn Malik", "Nick Jonas"],
+            [19, "Who played the role of Kabir in Kabir Singh?", "Ranbir Kapoor", "Varun Dhawan", "Shahid Kapoor", "Ranveer Singh", "Shahid Kapoor"],
+            [20, "Who was the lead actress in Padmaavat?", "Priyanka Chopra", "Deepika Padukone", "Kareena Kapoor", "Anushka Sharma", "Deepika Padukone"],
+            [21, "Who was the lead actress in Lagaan?", "Kajol", "Kareena Kapoor", "Gracy Singh", "Katrina Kaif", "Gracy Singh"],
+            [22, "Who was the lead actor in Haider?", "Hrithik Roshan", "Shahid Kapoor", "Ajay Devgan", "Ranbir Kapoor", "Shahid Kapoor"],
+            [23, "Who is Sonakshi Sinha's husband?", "Karan Kundra", "Salman Khan", "Ajay Devgan", "Iqbal Khan", "Iqbal Khan"],
+            [24, "Who is Ranveer Singh's wife?", "Kareena Kapoor", "Gracy Singh", "Anushka Sharma", "Deepika Padukone", "Deepika Padukone"],
+            [25, "Who was the lead actress in Kalki?", "Anushka Sharma", "Deepika Padukone", "Kajol", "Kareena Kapoor", "Deepika Padukone"],
+            [26, "Who is Saif Ali Khan's Wife?", "Preity Zinta", "Kareena Kapoor", "Tamannaah Bhatia", "Amrita Singh", "Kareena Kapoor"],
+            [27, "Who played Akshay Kumar's mother's role in Waqt?", "Twinkle Khanna", "Madhuri Dixit", "Priyanka Chopra", "Shefali Shah", "Shefali Shah"],
+            [28, "Who played the role of Vedha in Vikram Vedha?", "Saif Ali Khan", "Hrithik Roshan", "Kapil Sharma", "Karan Kundra", "Hrithik Roshan"],
+            [29, "Who played the role of Radhika in Prem Ratan Dhan Payo?", "Samaira Rao", "Sonam Kapoor", "Swara Bhaskar", "Aashika Bhatia", "Aashika Bhatia"],
+            [30, "Who was the lead actor in Kambakkht Ishq?", "Arjun Rampal", "Aamir Khan", "Akshay Kumar", "Arbaaz Khan", "Akshay Kumar"]
+        ];
+
+        let timerInterval;
+        let prizemoney = 0;
+        let currentQuestion = 0;
+        let quizStarted = false;
+        let shuffledQuestions = [];
+
+        function startQuiz() {
+            prizemoney = 0;
+            currentQuestion = 0;
+            document.getElementById('result').innerText = '';
+            document.getElementById('start-button').style.display = 'none';
+            shuffledQuestions = shuffleArray([...quesbank]);
+            quizStarted = true;
+            startTimer(3.2 * 60);
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const timerElement = document.createElement('p');
+            timerElement.id = 'timer';
+            timerElement.style.fontSize = '1.5em';
+            timerElement.style.color = '#fff';
+            document.body.appendChild(timerElement);
+
+            timerInterval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timerElement.textContent = `Time Remaining: ${minutes}:${seconds}`;
+
+                if (--timer < 0) {
+                    clearInterval(timerInterval);
+                    endQuiz();
+                }
+            }, 1000);
+        }
+
+        function displayQuestion() {
+            if (!quizStarted) return;
+
+            if (currentQuestion < shuffledQuestions.length) {
+                const que = shuffledQuestions[currentQuestion];
+                let questionHTML = `<p>Question ${currentQuestion + 1}: ${que[1]}</p>`;
+                for (let i = 2; i <= 5; i++) {
+                    questionHTML += `<input type="radio" name="answer" value="${que[i]}"> ${que[i]}<br>`;
+                }
+                questionHTML += `<button onclick="checkAnswer()">Submit Answer</button>`;
+                questionHTML += `<p class="feedback" id="feedback"></p>`;
+                document.getElementById('quiz-container').innerHTML = questionHTML;
+            } else {
+                endQuiz();
+            }
+        }
+
+        function checkAnswer() {
+            if (!quizStarted) return;
+
+            const options = document.getElementsByName('answer');
+            let selectedAnswer;
+            for (const option of options) {
+                if (option.checked) {
+                    selectedAnswer = option.value;
+                    break;
+                }
+            }
+            const correctAnswer = shuffledQuestions[currentQuestion][6];
+            let feedback = document.getElementById('feedback');
+            if (selectedAnswer === correctAnswer) {
+                prizemoney += 100;
+                feedback.innerText = "YAY! CORRECT ANSWER";
+                feedback.style.color = "lightgreen";
+            } else {
+                prizemoney -= 50;
+                feedback.innerText = "OOPS! WRONG ANSWER";
+                feedback.style.color = "lightcoral";
+            }
+            currentQuestion++;
+            setTimeout(displayQuestion, 2000);
+        }
+
+        function endQuiz() {
+            clearInterval(timerInterval);
+            quizStarted = false;
+            document.getElementById('quiz-container').innerHTML = '';
+            document.getElementById('result').innerText = `You won: ${prizemoney}`;
+            document.getElementById('start-button').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
